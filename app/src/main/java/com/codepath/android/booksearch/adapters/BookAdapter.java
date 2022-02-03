@@ -1,17 +1,20 @@
 package com.codepath.android.booksearch.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.codepath.android.booksearch.R;
+import com.codepath.android.booksearch.activities.BookDetailActivity;
 import com.codepath.android.booksearch.models.Book;
 
 import java.util.ArrayList;
@@ -24,43 +27,14 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
     // Define listener member variable
     private OnItemClickListener listener;
 
-    // Define the listener interface
-    public interface OnItemClickListener {
-        void onItemClick(View itemView, int position);
+    public BookAdapter(Context context, ArrayList<Book> aBooks) {
+        mBooks = aBooks;
+        mContext = context;
     }
 
     // Define the method that allows the parent activity or fragment to define the listener
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
-    }
-
-    // View lookup cache
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView ivCover;
-        public TextView tvTitle;
-        public TextView tvAuthor;
-
-        public ViewHolder(final View itemView, final OnItemClickListener clickListener) {
-            // Stores the itemView in a public final member variable that can be used
-            // to access the context from any ViewHolder instance.
-            super(itemView);
-
-            ivCover = (ImageView)itemView.findViewById(R.id.ivBookCover);
-            tvTitle = (TextView)itemView.findViewById(R.id.tvTitle);
-            tvAuthor = (TextView)itemView.findViewById(R.id.tvAuthor);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    clickListener.onItemClick(itemView, getAdapterPosition());
-                }
-            });
-        }
-    }
-
-    public BookAdapter(Context context, ArrayList<Book> aBooks) {
-        mBooks = aBooks;
-        mContext = context;
     }
 
     // Usually involves inflating a layout from XML and returning the holder
@@ -77,7 +51,6 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         return viewHolder;
     }
 
-
     // Involves populating data into the item through holder
     @Override
     public void onBindViewHolder(BookAdapter.ViewHolder viewHolder, int position) {
@@ -91,8 +64,14 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         Glide.with(getContext())
                 .load(Uri.parse(book.getCoverUrl()))
                 .apply(new RequestOptions()
-                .placeholder(R.drawable.ic_nocover))
+                        .placeholder(R.drawable.ic_nocover))
                 .into(viewHolder.ivCover);
+
+        viewHolder.itemView.setOnClickListener(view -> {
+            Intent intent = new Intent(view.getContext(), BookDetailActivity.class);
+            intent.putExtra("book", book);
+            view.getContext().startActivity(intent);
+        });
         // Return the completed view to render on screen
     }
 
@@ -105,6 +84,35 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
     // Easy access to the context object in the recyclerview
     private Context getContext() {
         return mContext;
+    }
+
+    // Define the listener interface
+    public interface OnItemClickListener {
+        void onItemClick(View itemView, int position);
+    }
+
+    // View lookup cache
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public ImageView ivCover;
+        public TextView tvTitle;
+        public TextView tvAuthor;
+
+        public ViewHolder(final View itemView, final OnItemClickListener clickListener) {
+            // Stores the itemView in a public final member variable that can be used
+            // to access the context from any ViewHolder instance.
+            super(itemView);
+
+            ivCover = (ImageView) itemView.findViewById(R.id.ivBookCover);
+            tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
+            tvAuthor = (TextView) itemView.findViewById(R.id.tvAuthor);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    clickListener.onItemClick(itemView, getAdapterPosition());
+                }
+            });
+        }
     }
 
 }

@@ -1,5 +1,7 @@
 package com.codepath.android.booksearch.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import org.json.JSONArray;
@@ -8,26 +10,29 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class Book {
+public class Book implements Parcelable {
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
+        @Override
+        public Book createFromParcel(Parcel in) {
+            return new Book(in);
+        }
+
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
     private String openLibraryId;
     private String author;
     private String title;
 
-    public String getOpenLibraryId() {
-        return openLibraryId;
+    public Book() {
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    // Get book cover from covers API
-    public String getCoverUrl() {
-        return "https://covers.openlibrary.org/b/olid/" + openLibraryId + "-L.jpg?default=false";
+    private Book(Parcel parcel) {
+        openLibraryId = parcel.readString();
+        author = parcel.readString();
+        title = parcel.readString();
     }
 
     // Returns a Book given the expected JSON
@@ -38,7 +43,7 @@ public class Book {
             // Check if a cover edition is available
             if (jsonObject.has("cover_edition_key")) {
                 book.openLibraryId = jsonObject.getString("cover_edition_key");
-            } else if(jsonObject.has("edition_key")) {
+            } else if (jsonObject.has("edition_key")) {
                 final JSONArray ids = jsonObject.getJSONArray("edition_key");
                 book.openLibraryId = ids.getString(0);
             }
@@ -86,5 +91,34 @@ public class Book {
             }
         }
         return books;
+    }
+
+    public String getOpenLibraryId() {
+        return openLibraryId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    // Get book cover from covers API
+    public String getCoverUrl() {
+        return "https://covers.openlibrary.org/b/olid/" + openLibraryId + "-L.jpg?default=false";
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(openLibraryId);
+        parcel.writeString(author);
+        parcel.writeString(title);
     }
 }
